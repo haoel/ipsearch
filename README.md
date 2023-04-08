@@ -46,7 +46,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/haoel/ipsearch"
 )
 
@@ -77,7 +76,11 @@ search, err := ipsearch.NewIPSearchWithURL(url)
 
 ```go
 package main
-import "github.com/haoel/ipsearch"
+
+import (
+	"fmt"
+	"github.com/haoel/ipsearch"
+)
 
 func main() {
 	search, err := ipsearch.NewIPSearchWithFile("./data/asn-country-ipv4.csv", ipsearch.Geo)
