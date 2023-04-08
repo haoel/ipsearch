@@ -45,7 +45,8 @@ func TestLoadFromFile(t *testing.T) {
 func TestLoadFromURL(t *testing.T) {
 
 	endpoint := "127.0.0.1:9898"
-	search, err := ipsearch.NewIPSearchWithFileFromURL("http://"+endpoint+"/not-exist-file", ipsearch.CIDR)
+	protocol := "http://" + endpoint + "/"
+	search, err := ipsearch.NewIPSearchWithFileFromURL(protocol+"not-exist-file", ipsearch.CIDR)
 	assert.NotNil(t, err)
 
 	//start http server
@@ -54,7 +55,7 @@ func TestLoadFromURL(t *testing.T) {
 	}()
 
 	for {
-		search, err = ipsearch.NewIPSearchWithFileFromURL("http://"+endpoint+"/china_ip_list.txt", ipsearch.CIDR)
+		search, err = ipsearch.NewIPSearchWithFileFromURL(protocol+"china_ip_list.txt", ipsearch.CIDR)
 		if err != nil && strings.Contains(err.Error(), "connection refused") {
 			time.Sleep(100 * time.Millisecond)
 			continue
@@ -65,7 +66,7 @@ func TestLoadFromURL(t *testing.T) {
 	}
 
 	for {
-		search, err = ipsearch.NewIPSearchWithFileFromURL("http://"+endpoint+"/asn-country-ipv4.csv", ipsearch.Geo)
+		search, err = ipsearch.NewIPSearchWithFileFromURL(protocol+"/asn-country-ipv4.csv", ipsearch.Geo)
 		if err != nil && strings.Contains(err.Error(), "connection refused") {
 			time.Sleep(100 * time.Millisecond)
 			continue
@@ -97,4 +98,18 @@ func testCIDRSearch(t *testing.T, search *ipsearch.IPSearch) {
 }
 
 func testGeoSearch(t *testing.T, search *ipsearch.IPSearch) {
+	type testGeoData struct {
+		ip      string
+		country string
+	}
+	var testGeoDataList = []testGeoData{
+		{"27.100.25.1", "IN"},
+		{"31.25.64.1", "SE"},
+		{"185.226.6.1", "US"},
+	}
+	for _, data := range testGeoDataList {
+		ip := search.Search(data.ip)
+		assert.NotNil(t, ip)
+		assert.Equal(t, ip.Country(), data.country)
+	}
 }

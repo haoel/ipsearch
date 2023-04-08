@@ -32,7 +32,7 @@ func TestIP(t *testing.T) {
 	assert.Equal(t, ip, ipToInt(ipStr))
 	assert.Equal(t, ipsearch.IPIntToStr(ip), intToIP(ip))
 
-	ipStr = "1.1.1.1"
+	ipStr = "1.1.1.2"
 	ip = ipsearch.IPStrToInt(ipStr)
 	assert.Equal(t, ip, ipToInt(ipStr))
 	assert.Equal(t, ipsearch.IPIntToStr(ip), intToIP(ip))
@@ -51,8 +51,8 @@ func TestCIDR(t *testing.T) {
 
 	ipCIDR = "1.1.1.1"
 	start, end = ipsearch.IPCIDRRange(ipCIDR)
-	assert.Equal(t, ipToInt("1.1.1.1"), start)
-	assert.Equal(t, ipToInt("1.1.1.1"), end)
+	assert.Equal(t, ipToInt(ipCIDR), start)
+	assert.Equal(t, ipToInt(ipCIDR), end)
 
 }
 
