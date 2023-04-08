@@ -74,6 +74,13 @@ func TestIPRangeSplit(t *testing.T) {
 	assert.Equal(t, "67.231.224.0 - 67.255.255.255", ips[0].Range())
 	assert.Equal(t, "68.0.0.0 - 68.65.215.255", ips[1].Range())
 
+	ip = ipsearch.NewIPRange("6.0.0.0,8.127.255.255,US", ipsearch.Geo)
+	ips = ip.Split()
+	assert.Equal(t, 3, len(ips))
+	assert.Equal(t, "6.0.0.0 - 6.255.255.255", ips[0].Range())
+	assert.Equal(t, "7.0.0.0 - 7.255.255.255", ips[1].Range())
+	assert.Equal(t, "8.0.0.0 - 8.127.255.255", ips[2].Range())
+
 	ip = ipsearch.NewIPRange("1.1.1.2,1.1.1.4,TEST", ipsearch.Geo)
 	ips = ip.Split()
 	assert.Equal(t, 1, len(ips))

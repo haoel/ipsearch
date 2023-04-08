@@ -64,7 +64,7 @@ func NewIPGeo(csv string) *IPRange {
 	firstSegStart := GetIPSegment(fields[0], 1)
 	firstSegEnd := GetIPSegment(fields[1], 1)
 	if firstSegStart != firstSegEnd {
-		log.Warnf("First segment of IP range is not the same: %s", csv)
+		log.Debugf("First segment of IP range is not the same: %s", csv)
 	}
 	start := IPStrToInt(fields[0])
 	end := IPStrToInt(fields[1])

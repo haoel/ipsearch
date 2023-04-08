@@ -106,6 +106,7 @@ func testGeoSearch(t *testing.T, search *ipsearch.IPSearch) {
 		{"27.100.25.1", "IN"},
 		{"31.25.64.1", "SE"},
 		{"185.226.6.1", "US"},
+		{"8.8.8.8", "US"},
 	}
 	for _, data := range testGeoDataList {
 		ip := search.Search(data.ip)

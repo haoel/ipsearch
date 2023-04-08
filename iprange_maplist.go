@@ -12,7 +12,10 @@ func NewIPRangeMapList() IPRangeMapList {
 // AppendBatch adds a list of IPv4 CIDR ranges to the map of lists of IPv4 CIDR ranges.
 func (m IPRangeMapList) AppendBatch(ipRanges []*IPRange) {
 	for _, ip := range ipRanges {
-		m.Append(ip)
+		ips := ip.Split()
+		for _, ip := range ips {
+			m.Append(ip)
+		}
 	}
 }
 

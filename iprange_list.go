@@ -26,31 +26,29 @@ func NewIPRangeList(lines []string, rangeType RangeType) IPRangeList {
 
 // Append adds a IPv4 range to the list.
 func (list *IPRangeList) Append(ip *IPRange) {
-	ips := ip.Split()
-	*list = append(*list, ips...)
+	*list = append(*list, ip)
 }
 
 // InsertSorted inserts a IPv4 range to the list, keeping the list sorted.
 func (list *IPRangeList) InsertSorted(ip *IPRange) {
-	ips := ip.Split()
-	for _, ip := range ips {
-		//using the binary search to search the index of list to insert the cidr
-		start := 0
-		end := len(*list) - 1
-		for start <= end {
-			mid := (start + end) / 2
-			if (*list)[mid].start < ip.start {
-				start = mid + 1
-			} else {
-				end = mid - 1
-			}
+
+	//using the binary search to search the index of list to insert the cidr
+	start := 0
+	end := len(*list) - 1
+	for start <= end {
+		mid := (start + end) / 2
+		if (*list)[mid].start < ip.start {
+			start = mid + 1
+		} else {
+			end = mid - 1
 		}
-		idx := start
-		//insert the cidr to the list
-		*list = append(*list, nil)
-		copy((*list)[idx+1:], (*list)[idx:])
-		(*list)[idx] = ip
 	}
+	idx := start
+	//insert the cidr to the list
+	*list = append(*list, nil)
+	copy((*list)[idx+1:], (*list)[idx:])
+	(*list)[idx] = ip
+
 }
 
 // Sort sorts the list of IPv4 CIDR ranges.

@@ -43,20 +43,26 @@ To update these two data files, run the following script:
 
 ```go
 package main
-import "github.com/haoel/ipsearch"
+
+import (
+	"fmt"
+
+	"github.com/haoel/ipsearch"
+)
 
 func main() {
-    search, err := ipsearch.NewIPSearchWithFile("data/china_ip_list.txt", ipsearch.CIDR)
-    if err != nil {
-        panic(err)
-    }
+	search, err := ipsearch.NewIPSearchWithFile("./data/china_ip_list.txt", ipsearch.CIDR)
+	if err != nil {
+		panic(err)
+	}
 
-    ip := search.Search("1.1.1.1")
-    if ip != nil {
-        fmt.Printf("IP %s is in the list\n", ip)
-    } else {
-        fmt.Printf("IP %s is not in the list\n", ip)
-    }
+	ipStr := "114.114.114.114"
+	ip := search.Search(ipStr)
+	if ip != nil {
+		fmt.Printf("IP [%s] is in China\n", ipStr)
+	} else {
+		fmt.Printf("IP [%s] is not China\n", ipStr)
+	}
 }
 ```
 
@@ -74,16 +80,17 @@ package main
 import "github.com/haoel/ipsearch"
 
 func main() {
-    search, err := ipsearch.NewIPSearchWithFile("data/asn-country-ipv4", ipsearch.Geo)
-    if err != nil {
-        panic(err)
-    }
-    ip := search.Search("1.1.1.1")
-    if ip != nil {
-        fmt.Printf("Country Code: %s\n", ip.Country())
-    } else {
-        fmt.Printf("IP %s is not in the list\n", ip)
-    }
+	search, err := ipsearch.NewIPSearchWithFile("./data/asn-country-ipv4.csv", ipsearch.Geo)
+	if err != nil {
+		panic(err)
+	}
+	ipStr := "8.8.8.8"
+	ip := search.Search(ipStr)
+	if ip != nil {
+		fmt.Printf("IP [%s] Country Code: %s\n", ipStr, ip.Country())
+	} else {
+		fmt.Printf("IP [%s] is not found!\n", ipStr)
+	}
 }
 ```
 
