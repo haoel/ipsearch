@@ -1,25 +1,62 @@
 # IP Search
 
-This is a simple lib to search for IP addresses in a CIDRs list.
+This is a simple library to search for IP addresses for two different IP Databases: **IP CIDR List** and **IP Geo CVS**, which go
 
-## Usage
+**Table of Contents**
+- [IP Search](#ip-search)
+  - [1. IP Database](#1-ip-database)
+  - [2. Usage](#2-usage)
+    - [2.1 Check an IP address is in the IP CIDR list](#21-check-an-ip-address-is-in-the-ip-cidr-list)
+    - [2.2 Get the Country Code of an IP address](#22-get-the-country-code-of-an-ip-address)
+  - [3. Technical Details](#3-technical-details)
+  - [4. License](#4-license)
+
+
+
+
+## 1. IP Database
+
+This library can deal with the following IP databases:
+
+- `china_ip_list.txt`:  A list of IP addresses in China. This list is
+  from the [China IP List](https://github.com/17mon/china_ip_list) project.
+
+- `asn-country-ipv4.txt`:  A list of IP addresses and their ASN and country
+  information. This list is from the [IP Location DB](https://github.com/sapics/ip-location-db)
+  project.
+
+To update these two data files, run the following script:
+
+```bash
+./data/update.sh
+```
+> **Note**
+>
+>  - The CIDRs file must be a plain text file, and each line is a CIDR.
+>  - The CIDRs cannot be overlapped.
+
+
+## 2. Usage
+
+### 2.1 Check an IP address is in the IP CIDR list
 
 
 ```go
+package main
 import "github.com/haoel/ipsearch"
 
-package main
+func main() {
+    search, err := ipsearch.NewIPSearchWithFile("data/china_ip_list.txt", ipsearch.CIDR)
+    if err != nil {
+        panic(err)
+    }
 
-search, err := ipsearch.NewIPSearchWithFile("data/china_ip_list.txt")
-if err != nil {
-    panic(err)
-}
-
-ip := "1.1.1.1"
-if search.Check(ip) {
-    fmt.Println("The IP %s is in the list", ip)
-} else {
-    fmt.Println("The IP %s is not in the list", ip)
+    ip := search.Search("1.1.1.1")
+    if ip != nil {
+        fmt.Printf("IP %s is in the list\n", ip)
+    } else {
+        fmt.Printf("IP %s is not in the list\n", ip)
+    }
 }
 ```
 
@@ -30,7 +67,63 @@ url := "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_li
 search, err := ipsearch.NewIPSearchWithURL(url)
 ```
 
-> **Note:**
+### 2.2 Get the Country Code of an IP address
+
+```go
+package main
+import "github.com/haoel/ipsearch"
+
+func main() {
+    search, err := ipsearch.NewIPSearchWithFile("data/asn-country-ipv4", ipsearch.Geo)
+    if err != nil {
+        panic(err)
+    }
+    ip := search.Search("1.1.1.1")
+    if ip != nil {
+        fmt.Printf("Country Code: %s\n", ip.Country())
+    } else {
+        fmt.Printf("IP %s is not in the list\n", ip)
+    }
+}
+```
+
+## 3. Technical Details
+
+The IP search is using the [Hash Table](https://en.wikipedia.org/wiki/Hash_table) and  [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm) algorithm.
+
+The key of the hash table is the first 16 bits of the IP address, and the value is the sorted list of CIDRs that have the same first 8 bits.
+
+```
+[  1 ] -> [1.0.1.0/24],
+          [1.0.2.0/23],
+          [1.1.4.0/22]
+          ...
+[ 14 ] -> [14.0.0.0/21],
+          [14.0.12.0/22],
+          [14.1.0.0/22]
+          ...
+```
+
+The `IPRangeMapList` is the hash table that stores all of the sorted CIDRs lists.
+
+For the GeoIP database, it gives the `start` and `end` IP address, this would across the multiple hash table keys, so we need to split it.
+
+For example,  if the IP range is `1.1.0.0 - 3.2.2.255`, we need to split it into three ranges:
+
+- `1.1.0.0 - 1.255.255.255`
+- `2.0.0.0 - 2.255.255.255`
+- `3.0.0.0 - 3.2..2.255`
+
+The split algorithm is in the `IPRange.Split()` function in the `iprange.go` file.
+
+> **Note**
 >
->  - The CIDRs file must be a plain text file, and each line is a CIDR.
->  - The CIDRs cannot be overlapped.
+> And I didn't use the standard `net.IP` type, because of the following two reasons:
+>
+> - We can be free to customize and extend the algorithm
+> - We can port the algorithm to other languages easily.
+>
+
+## 4. License
+
+This project is MIT licensed. See the [LICENSE](LICENSE) file for details.

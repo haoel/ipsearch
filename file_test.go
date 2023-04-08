@@ -1,7 +1,9 @@
 package ipsearch_test
 
 import (
+	"bufio"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -10,18 +12,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	TestDir   = "data"
-	IPv4File  = "data/china_ip_list.txt"
-	FileLines = 6291
+var (
+	FileLines = getFilesLineNum(IPv4CIDRFile)
 )
+
+// Get line number of file
+func getFilesLineNum(filename string) int {
+	file, err := os.Open(filename)
+	if err != nil {
+		return 0
+	}
+	defer file.Close()
+
+	var lines int
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines++
+	}
+	return lines
+}
 
 func TestFile(t *testing.T) {
 	lines, err := ipsearch.ReadFile("not_exist_file")
 	assert.NotNil(t, err)
 	assert.Nil(t, lines)
 
-	lines, err = ipsearch.ReadFile(IPv4File)
+	lines, err = ipsearch.ReadFile(IPv4CIDRFile)
 	test(t, lines, err)
 }
 

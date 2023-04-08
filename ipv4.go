@@ -26,6 +26,9 @@ func IPCIDRRange(cidr string) (uint32, uint32) {
 		ip1, ip2, ip3, ip4, mask uint32
 	)
 	fmt.Sscanf(cidr, "%d.%d.%d.%d/%d", &ip1, &ip2, &ip3, &ip4, &mask)
+	if mask == 0 || mask > 32 {
+		mask = 32
+	}
 	start := ip1<<24 | ip2<<16 | ip3<<8 | ip4
 	end := start | (1<<(32-mask) - 1)
 	return start, end

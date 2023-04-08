@@ -38,7 +38,7 @@ func TestIP(t *testing.T) {
 	assert.Equal(t, ipsearch.IPIntToStr(ip), intToIP(ip))
 }
 
-func TestIPRange(t *testing.T) {
+func TestCIDR(t *testing.T) {
 	ipCIDR := "192.168.1.0/24"
 	start, end := ipsearch.IPCIDRRange(ipCIDR)
 
@@ -48,6 +48,12 @@ func TestIPRange(t *testing.T) {
 	ip := "192.168.1.1"
 	assert.True(t, ipsearch.IPInCIDR(ip, ipCIDR))
 	assert.False(t, ipsearch.IPInCIDR("192.168.10.10", ipCIDR))
+
+	ipCIDR = "1.1.1.1"
+	start, end = ipsearch.IPCIDRRange(ipCIDR)
+	assert.Equal(t, ipToInt("1.1.1.1"), start)
+	assert.Equal(t, ipToInt("1.1.1.1"), end)
+
 }
 
 func TestIPSegment(t *testing.T) {

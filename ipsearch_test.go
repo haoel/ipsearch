@@ -10,29 +10,42 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test(t *testing.T) {
-	search := ipsearch.NewIPSearch(cidrs)
-	assert.True(t, search.Check("1.0.1.24"))
-	assert.True(t, search.Check("1.4.1.1"))
-	assert.True(t, search.Check("43.224.242.100"))
-	assert.True(t, search.Check("101.236.0.1"))
-	assert.False(t, search.Check("101.240.0.1"))
+const (
+	TestDir      = "data"
+	IPv4CIDRFile = "data/china_ip_list.txt"
+	IPv4GeoFile  = "data/asn-country-ipv4.csv"
+)
+
+func TestCIDRSearch(t *testing.T) {
+	search := ipsearch.NewIPSearch(cidrs, ipsearch.CIDR)
+
+	for _, data := range testCIDRDataList {
+		ip := search.Search(data.ip)
+		assert.Equal(t, ip != nil, data.find)
+		if ip != nil {
+			assert.Equal(t, ip.CIDR(), data.cidr)
+		}
+	}
 }
 
-func TestChina(t *testing.T) {
+func TestLoadFromFile(t *testing.T) {
 
-	search, err := ipsearch.NewIPSearchWithFile("not-exist-file")
+	search, err := ipsearch.NewIPSearchWithFile("not-exist-file", ipsearch.CIDR)
 	assert.NotNil(t, err)
 
-	search, err = ipsearch.NewIPSearchWithFile(IPv4File)
+	search, err = ipsearch.NewIPSearchWithFile(IPv4CIDRFile, ipsearch.CIDR)
 	assert.Nil(t, err)
-	testSearch(t, search)
+	testCIDRSearch(t, search)
+
+	search, err = ipsearch.NewIPSearchWithFile(IPv4GeoFile, ipsearch.Geo)
+	assert.Nil(t, err)
+	testGeoSearch(t, search)
 }
 
-func TestChinaFromURL(t *testing.T) {
+func TestLoadFromURL(t *testing.T) {
 
 	endpoint := "127.0.0.1:9898"
-	search, err := ipsearch.NewIPSearchWithFileFromURL("http://" + endpoint + "/not-exist-file")
+	search, err := ipsearch.NewIPSearchWithFileFromURL("http://"+endpoint+"/not-exist-file", ipsearch.CIDR)
 	assert.NotNil(t, err)
 
 	//start http server
@@ -41,19 +54,47 @@ func TestChinaFromURL(t *testing.T) {
 	}()
 
 	for {
-		search, err = ipsearch.NewIPSearchWithFileFromURL("http://" + endpoint + "/china_ip_list.txt")
-		if err!= nil && strings.Contains(err.Error(), "connection refused") {
+		search, err = ipsearch.NewIPSearchWithFileFromURL("http://"+endpoint+"/china_ip_list.txt", ipsearch.CIDR)
+		if err != nil && strings.Contains(err.Error(), "connection refused") {
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
 		assert.Nil(t, err)
-		testSearch(t, search)
+		testCIDRSearch(t, search)
+		break
+	}
+
+	for {
+		search, err = ipsearch.NewIPSearchWithFileFromURL("http://"+endpoint+"/asn-country-ipv4.csv", ipsearch.Geo)
+		if err != nil && strings.Contains(err.Error(), "connection refused") {
+			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+		assert.Nil(t, err)
+		testGeoSearch(t, search)
 		break
 	}
 }
 
-func testSearch(t *testing.T, search *ipsearch.IPSearch) {
-	assert.True(t, search.Check("1.0.1.24"))
-	assert.False(t, search.Check("1.1.1.1"))
-	assert.False(t, search.Check("8.8.8.8"))
+func testCIDRSearch(t *testing.T, search *ipsearch.IPSearch) {
+	type testCIDRData struct {
+		ip   string
+		cidr string
+		find bool
+	}
+	var testCIDRDataList = []testCIDRData{
+		{"1.0.1.24", "1.0.1.0/24", true},
+		{"8.8.8.8", "", false},
+		{"1.1.1.1", "", false},
+	}
+	for _, data := range testCIDRDataList {
+		ip := search.Search(data.ip)
+		assert.Equal(t, ip != nil, data.find)
+		if ip != nil {
+			assert.Equal(t, ip.CIDR(), data.cidr)
+		}
+	}
+}
+
+func testGeoSearch(t *testing.T, search *ipsearch.IPSearch) {
 }
