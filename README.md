@@ -125,7 +125,7 @@ The split algorithm is in the `IPRange.Split()` function in the `iprange.go` fil
 
 > **Note**
 >
-> And I didn't use the standard `net.IP` type, because of the following two reasons:
+> And I didn't use the standard `net/netip` library, because of the following two reasons:
 >
 > - We can be free to customize and extend the algorithm
 > - We can port the algorithm to other languages easily.
