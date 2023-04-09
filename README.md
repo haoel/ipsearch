@@ -101,7 +101,7 @@ func main() {
 
 The IP search is using the [Hash Table](https://en.wikipedia.org/wiki/Hash_table) and  [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm) algorithm.
 
-The key of the hash table is the first 16 bits of the IP address, and the value is the sorted list of CIDRs that have the same first 8 bits.
+The key of the hash table is the first 8 bits of the IP address, and the value is the sorted list of CIDRs that have the same first 8 bits.
 
 ```
 [  1 ] -> [1.0.1.0/24],
